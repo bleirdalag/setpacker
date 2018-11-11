@@ -13,8 +13,6 @@ def generate_sets(numsets, u):
     for size in range(1,u+1):
         for n in range(((u + 1) - (size))**2):
             weighted_size_list.append(size)
-
-    ##print(weighted_size_list)
                 
     for i in range(numsets):
         s = set()
