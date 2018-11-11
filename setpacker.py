@@ -1,4 +1,4 @@
-# Plotkin Shmoys Tardos fast approximation algorithm: fractional set packing
+# Plotkin Shmoys Tardos approximation algorithm for fractional set packing
 # https://www.satyenkale.com/papers/mw-survey.pdf : sections 2, 3, 3.3
 
 import math
@@ -8,13 +8,16 @@ import random
 # generates a list of sets of integers between 0 and u
 def generate_sets(numsets, u):
     setlist = []
+    # weight towards smaller set size
+    weighted_size_list = []
+    for size in range(1,u+1):
+        for n in range(((u + 1) - (size))**2):
+            weighted_size_list.append(size)
+
+    ##print(weighted_size_list)
+                
     for i in range(numsets):
         s = set()
-        # weight towards smaller set size
-        weighted_size_list = []
-        for size in range(1,u+1):
-            for n in range((u + 1) - (size)):
-                weighted_size_list.append(size)
         
         set_size = random.choice(weighted_size_list)
 
@@ -40,7 +43,7 @@ def pack(sets, epsilon):
             else:
                 elt_dict[elt] = [set_index]
 
-    # let rho (width of problem) be max # of sets that share a specific element
+    # let rho (width of problem) be max # of sets that share a specific elt
     rho = 0
     for elt in elt_dict:
         rho = max(rho, len(elt_dict[elt]))
@@ -56,14 +59,14 @@ def pack(sets, epsilon):
             for elt in sets[set_index]:
                 ps_list[set_index] += p[elt]
 
-        order = numpy.argsort(ps_list) # set indices in ascending order of prob
+        order = numpy.argsort(ps_list) # sets in ascending order of prob
 
         running_total = 0
         n_i = 0
         next_set = order[n_i]
         x_vector = [0] * n
         
-        # maximize sum of x-vector by filling with as many 1-values as possible
+        # maximize sum of x-vector by greedily filling with 1-values
         while (running_total + ps_list[next_set] < 1) and (n_i < (n-1)):
             running_total += ps_list[next_set]
             x_vector[next_set] = 1
@@ -114,24 +117,30 @@ def pack(sets, epsilon):
 # print the output of pack()
 def pretty_print(avg_x, best_prob, best_v, sets):
     v_hat = int(math.floor(best_v))
-    print("\n" * 5)
+    print("\n\n")
     print("You can pack ", v_hat, " sets. The ", v_hat + 1, " best sets are:")
     order = numpy.argsort(avg_x)[::-1] # set indices in descending order
     for i in range(v_hat + 1):
         if i < len(order):
             print(sets[order[i]])
 
-    all_sets = raw_input("\n View all sets? (y/n) ")
+    all_sets = raw_input("\n View all " + str(len(sets)) + " sets? (y/n) ")
     if (all_sets == "y") or (all_sets == "Y"):
         for i in range(len(order)):
             print("%.2f" % avg_x[order[i]] + "%: ", sets[order[i]])
         
         
 def main():
-    sets = generate_sets(random.randint(2,50), random.randint(2,250))
+    print("\ngenerating sets...")
+    sets = generate_sets(random.randint(2,50), random.randint(2,100))
+    print("packing sets...")
     avg_x, best_prob, best_v = pack(sets, .1)
     pretty_print(avg_x, best_prob, best_v, sets)
     
 
 if __name__ == "__main__":
     main()
+    
+    
+    
+
