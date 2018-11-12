@@ -62,7 +62,8 @@ def pack(sets, epsilon):
     n = len(sets) 
 
     # input p is a dictionary 'vector' mapping each element to a probability
-    # the oracle solves the one-constraint problem -pAx >= -p by maximizing
+    # the oracle (satisfying the definition in section 3.3 of the paper)
+    # solves the one-constraint problem -pAx >= -p by greedily maximizing
     # -pAx (by associating as many entries with a 1 value as possible)
     def oracle(p):
         # associate each set with a probability (not a distribution)
