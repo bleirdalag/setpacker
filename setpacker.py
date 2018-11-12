@@ -1,5 +1,5 @@
 # Plotkin Shmoys Tardos approximation algorithm for fractional set packing
-# https://www.satyenkale.com/papers/mw-survey.pdf : sections 2, 3, 3.3
+# https://www.satyenkale.com/papers/mw-survey.pdf sections 2, 3, 3.3, 3.3.4
 
 # $ python setpacker.py
 # to see a solution to a randomly generated instance from terminal, or
@@ -37,8 +37,10 @@ def generate_sets(numsets, u):
 
 
 # input: a list of sets of integers and error parameter epsilon
-# uses MWU implementation of PST algorithm to solve for -Ax >= -1 - epsilon
-# where A is an m by n matrix of constraints (two sets can't share an element)
+# uses MWU implementation of PST algorithm, described in section 3.3 and
+# 3.3.4 of the paper, to solve for -Ax >= -b - epsilon, where b is
+# the all-1s vector and A is an m by n matrix of constraints
+# (one constraint per element, so no two sets can share a specific element)
 # and x is a point in a convex subset of R^n between 0 and 1
 # the x_vector returned is an approximate fractional solution to the more
 # difficult set-packing problem where each entry can be either a 0 or a 1
@@ -62,8 +64,7 @@ def pack(sets, epsilon):
     n = len(sets) 
 
     # input p is a dictionary 'vector' mapping each element to a probability
-    # the oracle (satisfying the definition in section 3.3 of the paper)
-    # solves the one-constraint problem -pAx >= -p by greedily maximizing
+    # the oracle solves the one-constraint problem -pAx >= -p by maximizing
     # -pAx (by associating as many entries with a 1 value as possible)
     def oracle(p):
         # associate each set with a probability (not a distribution)
