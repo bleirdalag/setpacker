@@ -1,6 +1,11 @@
 # Plotkin Shmoys Tardos approximation algorithm for fractional set packing
 # https://www.satyenkale.com/papers/mw-survey.pdf : sections 2, 3, 3.3
 
+# $ python setpacker.py
+# to see a solution to a randomly generated instance from terminal, or
+# $ python -i setpacker.py
+# to play with the functions in a REPL
+
 import math
 import numpy
 import random
@@ -13,16 +18,17 @@ def generate_sets(numsets, u):
     for size in range(1,u+1):
         for n in range(((u + 1) - (size))**2):
             weighted_size_list.append(size)
-                
+            
+    # create sets    
     for i in range(numsets):
         s = set()
         
-        set_size = random.choice(weighted_size_list)
+        max_set_size = random.choice(weighted_size_list)
 
         # alternatively, choose set_size uniformly at random
-        # set_size = random.randint(1,u+1)
+        # max_set_size = random.randint(1,u+1)
         
-        for n in range(set_size):
+        for n in range(max_set_size):
             elt = random.randint(0,u)
             s.add(elt)
         setlist.append(s)
@@ -30,7 +36,13 @@ def generate_sets(numsets, u):
     return setlist
 
 
-# input a list of sets of integers and error parameter epsilon
+# input: a list of sets of integers and error parameter epsilon
+# uses MWU implementation of PST algorithm to solve for -Ax >= -1 - epsilon
+# where A is an m by n matrix of constraints (two sets can't share an element)
+# and x is a point in a convex subset of R^n between 0 and 1
+# the x_vector returned is an approximate fractional solution to the more
+# difficult set-packing problem where each entry can be either a 0 or a 1
+# (representing a set being left out or included in a setpacking solution)
 def pack(sets, epsilon):
     # create reverse lookup table: for each element, which sets contain it 
     elt_dict = {}
@@ -48,8 +60,10 @@ def pack(sets, epsilon):
         
     m = len(elt_dict) # size of universe
     n = len(sets) 
-           
-    # p is a dictionary associating each element with a probability
+
+    # input p is a dictionary 'vector' mapping each element to a probability
+    # the oracle solves the one-constraint problem -pAx >= -p by maximizing
+    # -pAx (by associating as many entries with a 1 value as possible)
     def oracle(p):
         # associate each set with a probability (not a distribution)
         ps_list = [0] * n
@@ -116,7 +130,8 @@ def pack(sets, epsilon):
 def pretty_print(avg_x, best_prob, best_v, sets):
     v_hat = int(math.floor(best_v))
     print("\n\n")
-    print("You can pack ", v_hat, " sets. The ", v_hat + 1, " best sets are:")
+    print("You can pack approximately " + str(best_v) + " sets. The " +
+          str(v_hat + 1) + " best sets are:")
     order = numpy.argsort(avg_x)[::-1] # set indices in descending order
     for i in range(v_hat + 1):
         if i < len(order):
@@ -125,7 +140,7 @@ def pretty_print(avg_x, best_prob, best_v, sets):
     all_sets = raw_input("\n View all " + str(len(sets)) + " sets? (y/n) ")
     if (all_sets == "y") or (all_sets == "Y"):
         for i in range(len(order)):
-            print("%.2f" % avg_x[order[i]] + "%: ", sets[order[i]])
+            print("%.2f" % (avg_x[order[i]] * 100) + "%: " + str(sets[order[i]]))
         
         
 def main():
